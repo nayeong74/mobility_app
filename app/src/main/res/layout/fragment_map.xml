@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/frame"
+    tools:context=".MapFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <!--    <fragment-->
+    <!--        android:id="@+id/map_fragment"-->
+    <!--        android:name="com.naver.maps.map.MapFragment"-->
+    <!--        android:layout_width="413dp"-->
+    <!--        android:layout_height="675dp"-->
+    <!--        tools:ignore="MissingConstraints" />-->
+    <!--    <com.naver.maps.map.MapView-->
+    <!--        android:id="@+id/navermap"-->
+    <!--        android:layout_width="413dp"-->
+    <!--        android:layout_height="675dp" />-->
+    <!--    지도 옵션 설정 xml에서 해야함-->
+    <com.naver.maps.map.MapView
+        android:id="@+id/navermap"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:navermap_locationButtonEnabled = "true">
+    </com.naver.maps.map.MapView>
+
+    <Button
+        android:id="@+id/obstacle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#F2F2F2"
+        android:text="위험요소" />
+
+    <!--    <ImageButton-->
+    <!--        android:id="@+id/button_map_voice"-->
+    <!--        android:layout_width="50dp"-->
+    <!--        android:layout_height="50dp"-->
+    <!--        android:background="#F2F2F2"-->
+    <!--        android:layout_gravity="right|top"-->
+    <!--        android:src="@android:drawable/ic_btn_speak_now"-->
+    <!--        />-->
+    <!--    <Button-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:id="@+id/button_map_voice"-->
+    <!--        android:layout_gravity="right|top"-->
+    <!--        android:text="ON"/>-->
+
+</FrameLayout>
