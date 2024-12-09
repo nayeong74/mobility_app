@@ -66,7 +66,7 @@ class AddRiskFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
-    val BASE_URL_FLAT_API = "http://13.125.210.178:8080"
+    val BASE_URL_FLAT_API = " http://172.30.1.73:3000"
 
     var permissions = arrayOf(
         Manifest.permission.CAMERA,
