@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
+<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -22,10 +22,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true">
-        <activity android:name=".DatabaseResultActivity"></activity>
-        <activity android:name=".MarkerResultActivity"></activity>
-        <activity android:name=".TestGetServerActivity" android:exported="true"/>
+        android:usesCleartextTraffic="true"
+        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+        tools:replace="android:appComponentFactory">
+        <activity android:name=".DatabaseResultActivity" android:exported="true"></activity>
+        <activity android:name=".MarkerResultActivity" android:exported="true"></activity>
+        <activity android:name=".TestGetServerActivity" android:exported="true"></activity>
         <activity android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -52,12 +54,12 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_path" />
         </provider>
-        <meta-data
-            android:name="com.kakao.sdk.AppKey"
-            android:value="KAKAO_MAP_KEY"/>
-        <meta-data
-            android:name="com.mapbox.token"
-            android:value="pk.eyJ1Ijoiam5heW91bmciLCJhIjoiY200ZDBoYnFhMGVyYzJxcHlpMzJsazkwcyJ9.pXN5O0vw-xujAuUf7_cgiw" />
+<!--        <meta-data-->
+<!--            android:name="com.kakao.sdk.AppKey"-->
+<!--            android:value="KAKAO_MAP_KEY"/>-->
+<!--        <meta-data-->
+<!--            android:name="com.mapbox.token"-->
+<!--            android:value="pk.eyJ1Ijoiam5heW91bmciLCJhIjoiY200ZDBoYnFhMGVyYzJxcHlpMzJsazkwcyJ9.pXN5O0vw-xujAuUf7_cgiw" />-->
 
     </application>
 

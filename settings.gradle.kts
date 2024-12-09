@@ -7,10 +7,12 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
-        mavenCentral()
+        mavenCentral() // Maven Central 저장소
+//        maven { url = uri("https://api.mapbox.com/downloads/v2/releases/maven") } // Mapbox 저장소
+//        maven { url = uri("https://jitpack.io")} // Kakao SDK를 위해 필요할 수 있음
         gradlePluginPortal()
         maven { url = uri("https://repository.map.naver.com/archive/maven") }
-        maven { url = uri("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/") }
+//        maven { url = uri("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/") }
     }
 }
 
@@ -20,7 +22,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = uri("https://repository.map.naver.com/archive/maven") }
-        maven { url = uri("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/") }
+//        maven { url = uri("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/") }
     }
 }
 

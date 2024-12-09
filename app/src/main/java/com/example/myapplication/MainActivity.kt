@@ -13,7 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.example.myapplication.databinding.ActivityDatabaseResultBinding
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.model.LatLng
+import com.naver.maps.geometry.LatLng
 import com.example.myapplication.databinding.ActivityMainBinding
 import java.security.MessageDigest
 
@@ -114,14 +114,14 @@ class MainActivity : AppCompatActivity() {
                     Log.i("location error","")          //
                 }
         }
-//        fusedLocationClient?.lastLocation?.addOnSuccessListener {//성공적으로 위치 가져왔으면?
-//            loc = LatLng(it.latitude,it.longitude) //현재위치로 위치정보를 바꾸겠다
-//            Log.i("currentLocation",loc.toString())
-//        }
+        fusedLocationClient?.lastLocation?.addOnSuccessListener {//성공적으로 위치 가져왔으면?
+            loc = LatLng(it.latitude,it.longitude) //현재위치로 위치정보를 바꾸겠다
+            Log.i("currentLocation",loc.toString())
+        }
     }
 
     private fun startLocationUpdates() { //gps 관련
-        locationRequest = LocationRequest.create()?.apply {
+        locationRequest = LocationRequest.create().apply {
             interval= 10000
             fastestInterval = 5000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
     private fun getAppKeyHash() {
         try {
             val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-            for (signature in info.signatures) {
+            for (signature in info.signatures!!) {
                 var md: MessageDigest
                 md = MessageDigest.getInstance("SHA")
                 md.update(signature.toByteArray())

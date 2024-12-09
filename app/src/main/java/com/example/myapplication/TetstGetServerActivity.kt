@@ -46,25 +46,41 @@ class TestGetServerActivity : AppCompatActivity() {
                     call: Call<List<ResultGet>>,
                     response: Response<List<ResultGet>>
                 ) {
-                    Log.d("결과", "성공 : ${response.raw()}")
-                    //textView5.text = response.body()?.toString()
+                    if (response.isSuccessful && response.body() != null) {
+                        val body = response.body()!!
 
-                    //val byte = response.body()?.get(0)?.location?.byteInputStream()
+                        // 첫 번째 이미지 처리
+                        val firstImage = body.getOrNull(0)?.image
+                        if (!firstImage.isNullOrEmpty()) {
+                            try {
+                                val decodedBytes = Base64.decode(firstImage, Base64.DEFAULT)
+                                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                                binding.imageView.setImageBitmap(bitmap)
+                                binding.textView5.text = body.getOrNull(0)?.location.toString()
+                            } catch (e: Exception) {
+                                Log.e("DecodeError", "Error decoding first image: ${e.message}")
+                            }
+                        } else {
+                            Log.e("ImageError", "First image is null or empty")
+                        }
 
-                    val decodedBytes = Base64.decode(response.body()?.get(0)?.image, 0)
-                    val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    binding.imageView.setImageBitmap(bitmap)
-                    binding.textView5.text =response.body()?.get(0)?.location.toString()
-
-                    binding.textView7.text = response.body()?.get(1)?.location.toString()
-                    val decodedBytes2 = Base64.decode(response.body()?.get(1)?.image, 0)
-                    val bitmap2 = BitmapFactory.decodeByteArray(decodedBytes2, 0, decodedBytes2.size)
-                    binding.imageView2.setImageBitmap(bitmap2)
-
-                    //val byte = response?.body()?.byteInputStream()
-                    //val bitmap = BitmapFactory.decodeStream(byte)
-                    //imageView.setImageBitmap(bitmap)
-                    Log.d("출력", "성공 :" + response.body().toString())
+                        // 두 번째 이미지 처리
+                        val secondImage = body.getOrNull(1)?.image
+                        if (!secondImage.isNullOrEmpty()) {
+                            try {
+                                val decodedBytes2 = Base64.decode(secondImage, Base64.DEFAULT)
+                                val bitmap2 = BitmapFactory.decodeByteArray(decodedBytes2, 0, decodedBytes2.size)
+                                binding.imageView2.setImageBitmap(bitmap2)
+                                binding.textView7.text = body.getOrNull(1)?.location.toString()
+                            } catch (e: Exception) {
+                                Log.e("DecodeError", "Error decoding second image: ${e.message}")
+                            }
+                        } else {
+                            Log.e("ImageError", "Second image is null or empty")
+                        }
+                    } else {
+                        Log.e("ResponseError", "Response failed or body is null")
+                    }
                 }
             })
 

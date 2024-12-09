@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-//import com.google.android.gms.maps.model.LatLng
 import com.naver.maps.geometry.LatLng
 import java.io.Serializable
 

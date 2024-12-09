@@ -1,3 +1,5 @@
+package com.example.myapplication
+
 import   android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -19,16 +21,22 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import com.google.android.gms.location.*
+import com.example.myapplication.DatabaseInfo
+import com.example.myapplication.DatabaseResultActivity
+import com.example.myapplication.FlatAPI
+import com.example.myapplication.MainActivity
+import com.example.myapplication.MarkerResultActivity
+import com.example.myapplication.R
+import com.example.myapplication.RoadviewInfo
+import com.example.myapplication.SharedViewModel
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.kakao.sdk.newtoneapi.SpeechRecognizerManager
-import com.kakao.sdk.newtoneapi.TextToSpeechClient
-import com.kakao.sdk.newtoneapi.TextToSpeechListener
-import com.kakao.sdk.newtoneapi.TextToSpeechManager
+//import com.kakao.sdk.newtoneapi.SpeechRecognizerManager
+//import com.kakao.sdk.newtoneapi.TextToSpeechClient
+//import com.kakao.sdk.newtoneapi.TextToSpeechListener
+//import com.kakao.sdk.newtoneapi.TextToSpeechManager
 import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.*
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.Marker
@@ -38,6 +46,12 @@ import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.util.MarkerIcons
 import com.example.myapplication.databinding.FragmentMapBinding
 import com.example.myapplication.databinding.FragmentInputWayBinding
+import com.naver.maps.map.CameraPosition
+import com.naver.maps.map.LocationTrackingMode
+import com.naver.maps.map.MapView
+import com.naver.maps.map.NaverMap
+import com.naver.maps.map.NaverMapOptions
+import com.naver.maps.map.OnMapReadyCallback
 import okhttp3.OkHttpClient
 import org.json.JSONArray
 import org.json.JSONObject
@@ -83,17 +97,17 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     val okHttpClient = OkHttpClient.Builder()
         .readTimeout(15, TimeUnit.MINUTES)
         .build();
-    val BASE_URL_FLAT_API ="http://13.125.253.43:8080/" //"http://15.164.166.74:8080"(민영) //"http://10.0.2.2:3000"(에뮬레이터-로컬서버 통신)
+    val BASE_URL_FLAT_API ="http://10.0.2.2:8080/api/"
     val gson = GsonBuilder().setLenient().create()
 
-    private val sharedViewModel:SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels()
     private lateinit var cameraLatLng: LatLng
     private val LOCATION_PERMISSION_REQUEST_CODE = 1000
 
     //위치
     private lateinit var locationSource: FusedLocationSource
     //TTS 클라이언트
-    var ttsClient : TextToSpeechClient? = null
+//    var ttsClient : TextToSpeechClient? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,7 +116,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-        locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+        locationSource = FusedLocationSource(requireActivity(), LOCATION_PERMISSION_REQUEST_CODE)
+        Log.d("Debug", "Context type: ${this::class.java.name}")
+
     }
 
     private var _binding: FragmentMapBinding? = null
@@ -119,7 +135,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val options = NaverMapOptions()
-            .camera(CameraPosition(LatLng(35.1798159, 129.0750222), 8.0))
+            .camera(CameraPosition(LatLng(36.3665, 127.3447), 14.0))
             .mapType(NaverMap.MapType.Terrain)
         //val mapFragment = MapView.newInstance(options)
         mapView = view.findViewById(R.id.navermap) as MapView
@@ -131,7 +147,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         mapView.getMapAsync(this)
         Log.i("mapView","getMapAsync시작")
-        textToSpeech()
+//        textToSpeech()
         //getuserlocationMapFragment()
         //locationUpdates()
         //locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
@@ -193,8 +209,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             //위치 오버레이
             locationOverlay.position = LatLng((activity as MainActivity).loc.latitude, (activity as MainActivity).loc.longitude)
             locationOverlay.bearing = 90f
+        } else {
+        cameraLatLng = LatLng(36.3665, 127.3447) // 충남대 정문 좌표
         }
-        //출발지 위치
+
+    //출발지 위치
         val polyline = PolylineOverlay()
         if (latlngList.size != 0) {
             cameraLatLng = LatLng(latlngList[0].latitude, latlngList[0].longitude)
@@ -206,9 +225,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             polyline.setMap(naverMap)
         }
 
-        if (this::cameraLatLng.isInitialized) {
-            naverMap.cameraPosition = CameraPosition(cameraLatLng, 14.5)
+        if (!this::cameraLatLng.isInitialized) {
+            cameraLatLng = LatLng(36.3665, 127.3447) // 충남대 정문
         }
+        naverMap.cameraPosition = CameraPosition(cameraLatLng, 14.5)
+
         naverMap.setMapType(NaverMap.MapType.Basic)
 
         naverMap.addOnLocationChangeListener { location ->
@@ -235,18 +256,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     Log.d("next_distance", next_distance.toString())
                     if (next_distance <= DISTANCE_BETWEEN_LOCATION_OBSTACLE.toDouble()) {
                         //Log.d("distance","반경 10m 이내에 위험요소가 있습니다. 위험요소와의 거리는"+next_risk.toString()+"입니다")
-                        ttsClient?.setSpeechText(
-                            "위험요소와 가까이 있습니다. 위험요소와의 직선 거리는" + String.format(
-                                "%.2f",
-                                next_distance
-                            ) + "미터 입니다."
-                        )
-                        ttsClient?.play()
-                        if (ROADVIEWINFO_INDEX < list_RoadviewInfo.size - 1) {
-                            ROADVIEWINFO_INDEX = ROADVIEWINFO_INDEX + 1
-                        } else {
-                            ROADVIEWINFO_INDEX = 0
-                        }
+//                        ttsClient?.setSpeechText(
+//                            "위험요소와 가까이 있습니다. 위험요소와의 직선 거리는" + String.format(
+//                                "%.2f",
+//                                next_distance
+//                            ) + "미터 입니다."
+//                        )
+//                        ttsClient?.play()
+//                        if (ROADVIEWINFO_INDEX < list_RoadviewInfo.size - 1) {
+//                            ROADVIEWINFO_INDEX = ROADVIEWINFO_INDEX + 1
+//                        } else {
+//                            ROADVIEWINFO_INDEX = 0
+//                        }
                     }
                 }
                 if (latlngList.size != 0){
@@ -256,8 +277,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                         if (start_distance <= DISTANCE_BETWEEN_LOCATION_PLACE.toDouble()){
                             Log.d("latlngList 안 안","***********")
                             //ttsClient?.stop()
-                            ttsClient?.setSpeechText("현재 위치는 출발지입니다")
-                            ttsClient?.play()
+//                            ttsClient?.setSpeechText("현재 위치는 출발지입니다")
+//                            ttsClient?.play()
                             ttsStart = true
                         }
                     }
@@ -265,21 +286,21 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                         destination_distance = distance(latlngList[latlngList.size-1].latitude,latlngList[latlngList.size-1].longitude, location.latitude,location.longitude,"meter")
                         if(destination_distance <= DISTANCE_BETWEEN_LOCATION_PLACE.toDouble()){
                             //ttsClient?.stop()
-                            ttsClient?.setSpeechText("최종 목적지에 도착했습니다")
-                            ttsClient?.play()
+//                            ttsClient?.setSpeechText("최종 목적지에 도착했습니다")
+//                            ttsClient?.play()
                             ttsDest = true
                         }
                     }
                 }
                 if (pointList.size != 0){
-//                    point_distance = distance(pointList[0].latitude, pointList[0].longitude, location.latitude, location.longitude,"meter")
-//                    Log.d("point_distance",point_distance.toString())
-//                    Log.d("point_distance_point",pointList[0].latitude.toString())
-//                    if (point_distance <= DISTANCE_BETWEEN_LOCATION_PLACE.toDouble()){
+                    point_distance = distance(pointList[0].latitude, pointList[0].longitude, location.latitude, location.longitude,"meter")
+                    Log.d("point_distance",point_distance.toString())
+                    Log.d("point_distance_point",pointList[0].latitude.toString())
+                    if (point_distance <= DISTANCE_BETWEEN_LOCATION_PLACE.toDouble()){
 //                        ttsClient?.setSpeechText("다음 목적지까지 거리는 "+String.format("%.2f", point_distance) +"미터 입니다.")
 //                        ttsClient?.play()
-//                        pointList.removeAt(0)
-//                    }
+                        pointList.removeAt(0)
+                    }
                 }
             }
         }
@@ -287,7 +308,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         ////////////////////////////////////////
         // RoadviewInfo 마커 띄우기 및 클릭이벤트 //
         if(list_RoadviewInfo.isNotEmpty()){
-            //ROADVIEWINFO_INDEX = 0
+            ROADVIEWINFO_INDEX = 0
             for(i in 0 until list_RoadviewInfo.size){
                 val marker = Marker()
                 marker.width = 105
@@ -296,18 +317,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
                 Log.d("마커",marker.width.toString())
                 Log.d("마커",marker.height.toString())
-                //marker.icon = OverlayImage.fromResource(R.drawable.danger)
+                marker.icon = OverlayImage.fromResource(R.drawable.danger)
                 marker.position = list_RoadviewInfo[i].location
                 marker.map = naverMap
                 marker.setOnClickListener {
                     // RoadviewInfo 객체를 액티비티로 전달
-                    val intent = Intent(activity,MarkerResultActivity::class.java)
+                    val intent = Intent(activity, MarkerResultActivity::class.java)
                     val args = Bundle()
                     args.putParcelable("location",list_RoadviewInfo[i].location)
                     intent.putExtra("bundle", args)
 
                     val decodedBytes = Base64.decode(list_RoadviewInfo[i].image,0)
-                    //val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                    val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                     intent.putExtra("image",decodedBytes)
                     startActivity(intent)
                     true
@@ -362,7 +383,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 }
                 marker2.setOnClickListener {
                     // DatabaseInfo 객체를 액티비티로 전달
-                    val intent = Intent(activity,DatabaseResultActivity::class.java)
+                    val intent = Intent(activity, DatabaseResultActivity::class.java)
                     val args = Bundle()
                     args.putParcelable("location",list_DatabaseInfo[i].latlng)
                     intent.putExtra("bundle", args)
@@ -451,33 +472,33 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-    private fun textToSpeech(){
-        SpeechRecognizerManager.getInstance().initializeLibrary(requireContext())
-        TextToSpeechManager.getInstance().initializeLibrary(requireContext())
-        //TTS 클라이언트 생성
-        ttsClient = TextToSpeechClient.Builder()
-            .setSpeechMode(TextToSpeechClient.NEWTONE_TALK_1)     // 음성합성방식
-            .setSpeechSpeed(0.9)                                  // 발음 속도
-            .setSpeechVoice(TextToSpeechClient.VOICE_MAN_READ_CALM)  //TTS 음색 모드 설정(여성 차분한 낭독체)
-            .setListener(object : TextToSpeechListener {
-                //음성합성이 종료될 때 호출된다.
-                override fun onFinished() {
-                    val intSentSize = ttsClient?.getSentDataSize()      //세션 중에 전송한 데이터 사이즈
-                    val intRecvSize = ttsClient?.getReceivedDataSize()  //세션 중에 전송받은 데이터 사이즈
-                    val strInacctiveText = "handleFinished() SentSize : $intSentSize  RecvSize : $intRecvSize"
-                    ttsClient?.stop()
-//                    handler.postDelayed(Runnable {
-//                        sttclient.startRecording(true)
-//                    }, 0)
-                    Log.i("kakao", strInacctiveText)
-                }
-                override fun onError(code: Int, message: String?) {
-                    Log.d("kakao", code.toString())
-                }
-            })
-            .build()
-
-    }
+//    private fun textToSpeech(){
+//        SpeechRecognizerManager.getInstance().initializeLibrary(requireContext())
+//        TextToSpeechManager.getInstance().initializeLibrary(requireContext())
+//        //TTS 클라이언트 생성
+//        ttsClient = TextToSpeechClient.Builder()
+//            .setSpeechMode(TextToSpeechClient.NEWTONE_TALK_1)     // 음성합성방식
+//            .setSpeechSpeed(0.9)                                  // 발음 속도
+//            .setSpeechVoice(TextToSpeechClient.VOICE_MAN_READ_CALM)  //TTS 음색 모드 설정(여성 차분한 낭독체)
+//            .setListener(object : TextToSpeechListener {
+//                //음성합성이 종료될 때 호출된다.
+//                override fun onFinished() {
+//                    val intSentSize = ttsClient?.getSentDataSize()      //세션 중에 전송한 데이터 사이즈
+//                    val intRecvSize = ttsClient?.getReceivedDataSize()  //세션 중에 전송받은 데이터 사이즈
+//                    val strInacctiveText = "handleFinished() SentSize : $intSentSize  RecvSize : $intRecvSize"
+//                    ttsClient?.stop()
+////                    handler.postDelayed(Runnable {
+////                        sttclient.startRecording(true)
+////                    }, 0)
+//                    Log.i("kakao", strInacctiveText)
+//                }
+//                override fun onError(code: Int, message: String?) {
+//                    Log.d("kakao", code.toString())
+//                }
+//            })
+//            .build()
+//
+//    }
 
     private fun sendToServerMapCoord(oneLatLng:LatLng, twoLatLng:LatLng, threeLatLng:LatLng, fourLatLng:LatLng){
         var coordOne = oneLatLng.latitude.toString()+","+oneLatLng.longitude.toString()
@@ -665,19 +686,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         for (i in 0..route.size-1){
             val rObject = route.get(i)
             val geo = rObject.getAsJsonObject("geometry")
-            //Log.d("geometry",geo.toString())
-            //Log.d("type",geo.get("type").toString())
+            Log.d("geometry",geo.toString())
+            Log.d("type",geo.get("type").toString())
             if (geo.get("type").toString().contains("LineString")){
                 val arrCoords = geo.getAsJsonArray("coordinates")
                 for (j in 0..arrCoords.size()-1){
-                    //Log.d("arrCoords", arrCoords[j].toString())
+                    Log.d("arrCoords", arrCoords[j].toString())
                     latlngList.add(LatLng(arrCoords[j].asJsonArray[1].asDouble,arrCoords[j].asJsonArray[0].asDouble))
                 }
             } else if (geo.get("type").toString().contains("Point")){
                 val arrCoords = geo.getAsJsonArray("coordinates")
                 Log.d("pointList",arrCoords[0].toString()+","+arrCoords[1].toString())
                 //Point 좌표만
-                //pointList.add(LatLng(arrCoords[1].asDouble,arrCoords[0].asDouble))
+                pointList.add(LatLng(arrCoords[1].asDouble,arrCoords[0].asDouble))
             }
         }
         var start = latlngList[0]

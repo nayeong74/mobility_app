@@ -7,13 +7,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import com.google.android.gms.maps.model.LatLng
+import com.naver.maps.geometry.LatLng
 import com.example.myapplication.databinding.ActivityDatabaseResultBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
+
 
 class DatabaseResultActivity : AppCompatActivity() {
 

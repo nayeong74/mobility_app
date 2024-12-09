@@ -26,7 +26,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.widget.addTextChangedListener
-import com.google.android.gms.maps.model.LatLng
+import com.naver.maps.geometry.LatLng
 import com.google.android.material.snackbar.Snackbar
 import com.example.myapplication.databinding.FragmentAddRiskBinding
 import java.io.File
@@ -102,7 +102,7 @@ class AddRiskFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentAddRiskBinding.inflate(inflater, container, false)
         return binding.root
     }
